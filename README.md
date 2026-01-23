@@ -1,4 +1,4 @@
-# TaskFlow - Scalable Web App with Authentication & Dashboard
+# Full-Stack Auth Dashboard
 
 A modern, scalable task management application built with React, Convex, and TailwindCSS. Features comprehensive authentication, real-time updates, and a powerful dashboard for task management.
 

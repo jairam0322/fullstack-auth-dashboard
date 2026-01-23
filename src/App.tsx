@@ -1,7 +1,6 @@
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { SignInForm } from "./SignInForm";
-import { SignOutButton } from "./SignOutButton";
+import { AuthForm, SignOutButton } from "./components/auth";
 import { Toaster } from "sonner";
 import Dashboard from "./components/Dashboard";
 
@@ -41,15 +40,7 @@ function Content() {
       
       <Unauthenticated>
         <div className="flex items-center justify-center min-h-[600px] p-8">
-          <div className="w-full max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to TaskFlow</h1>
-              <p className="text-xl text-gray-600">
-                Manage your tasks efficiently with our powerful dashboard
-              </p>
-            </div>
-            <SignInForm />
-          </div>
+          <AuthForm />
         </div>
       </Unauthenticated>
     </>

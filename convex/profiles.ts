@@ -11,6 +11,22 @@ async function getAuthenticatedUser(ctx: any) {
   return userId;
 }
 
+// Get my own profile (simple query for dashboard)
+export const getMyProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    return await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+  },
+});
+
 // Get user profile
 export const getUserProfile = query({
   args: {},
@@ -31,6 +47,40 @@ export const getUserProfile = query({
       user,
       profile,
     };
+  },
+});
+
+// Create initial profile during sign-up
+export const createProfileOnSignup = mutation({
+  args: {
+    userId: v.id("users"),
+    firstName: v.string(),
+    lastName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Check if profile already exists
+    const existingProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+
+    if (existingProfile) {
+      // UPDATE existing profile with firstName if it's empty or being set
+      if (args.firstName) {
+        await ctx.db.patch(existingProfile._id, {
+          firstName: args.firstName.trim(),
+        });
+      }
+      return existingProfile._id;
+    }
+
+    // Create new profile
+    return await ctx.db.insert("userProfiles", {
+      userId: args.userId,
+      firstName: args.firstName.trim(),
+      lastName: args.lastName.trim(),
+      bio: "",
+    });
   },
 });
 

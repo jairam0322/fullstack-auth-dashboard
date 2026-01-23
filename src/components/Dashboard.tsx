@@ -11,16 +11,18 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"tasks" | "profile">("tasks");
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
+
   const [filters, setFilters] = useState({
     status: undefined as any,
     priority: undefined as any,
     searchTerm: "",
   });
 
-  const userProfile = useQuery(api.profiles.getUserProfile);
+  const profile = useQuery(api.profiles.getMyProfile);
   const taskStats = useQuery(api.tasks.getTaskStats);
+  const currentUser = useQuery(api.auth.loggedInUser);
 
-  if (userProfile === undefined || taskStats === undefined) {
+  if (profile === undefined || taskStats === undefined || currentUser === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -40,17 +42,18 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {/* Welcome Header */}
+      {/* ✅ Welcome Header FIXED */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {userProfile.user?.email?.split("@")[0] || "User"}!
+          Welcome back
+          {profile?.firstName ? `, ${profile.firstName}` : ""}!
         </h1>
         <p className="text-gray-600">
-          Here's what's happening with your tasks today.
+          Manage your tasks and profile here.
         </p>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Tabs */}
       <div className="mb-6">
         <nav className="flex space-x-8">
           <button
@@ -79,39 +82,32 @@ export default function Dashboard() {
       {/* Content */}
       {activeTab === "tasks" ? (
         <div className="space-y-6">
-          {/* Task Statistics */}
           <TaskStats stats={taskStats} />
-
-          {/* Search and Filter */}
           <SearchAndFilter filters={filters} onFiltersChange={setFilters} />
 
-          {/* Add Task Button */}
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-900">Your Tasks</h2>
             <button
               onClick={() => setShowTaskForm(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
               Add New Task
             </button>
           </div>
 
-          {/* Task List */}
-          <TaskList
-            filters={filters}
-            onEditTask={handleEditTask}
-          />
+          <TaskList filters={filters} onEditTask={handleEditTask} />
 
-          {/* Task Form Modal */}
           {showTaskForm && (
-            <TaskForm
-              task={editingTask}
-              onClose={handleCloseForm}
-            />
+            <TaskForm task={editingTask} onClose={handleCloseForm} />
           )}
         </div>
       ) : (
-        <ProfileSection userProfile={userProfile} />
+        <ProfileSection
+          userProfile={{
+            user: currentUser,
+            profile: profile,
+          }}
+        />
       )}
     </div>
   );
